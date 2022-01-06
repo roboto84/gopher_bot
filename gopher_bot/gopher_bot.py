@@ -24,7 +24,7 @@ class GopherBot:
     def _receive_message_callback(self, package: dict) -> bool:
         if ('id' in package) and (package['id'] not in ['wh00t_server', 'gopher_bot']) and ('message' in package):
             if 'category' in package and package['category'] == 'chat_message' and \
-                    isinstance(package['message'], str) and self._chat_key in package['message']:
+                    isinstance(package['message'], str) and package['message'].replace(self._chat_key, '') == '':
                 self._send_server_data()
         return True
 
