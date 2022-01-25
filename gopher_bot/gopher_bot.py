@@ -1,5 +1,7 @@
 # Gopher server stats bot
 import os
+import uuid
+import re
 import psutil
 import socket
 import logging.config
@@ -14,6 +16,8 @@ class GopherBot:
         self._logger.setLevel(logging.INFO)
         self._chat_key: str = '/gopher'
         self._host_name: str = socket.gethostname()
+        self._host_ip_address: str = socket.gethostbyname(self._host_name)
+        self._mac_address: str = GopherBot._get_mac_address()
         self._socket_network: ClientNetwork = ClientNetwork(socket_host, socket_port,
                                                             'gopher_bot', 'app', logging)
 
@@ -27,6 +31,15 @@ class GopherBot:
                     isinstance(package['message'], str) and package['message'].replace(self._chat_key, '') == '':
                 self._send_server_data()
         return True
+
+    @staticmethod
+    def _get_mac_address():
+        mac_address: int = uuid.getnode()
+        if (mac_address >> 40)%2 :
+            mac_address_string = 'MAC address not found'
+        else:
+            mac_address_string = ':'.join(re.findall('..', '%012x' % mac_address))
+        return mac_address_string
 
     @staticmethod
     def round_stat(data: float) -> float:
@@ -45,7 +58,9 @@ class GopherBot:
                               f'\n CPU Load: {self.round_stat(cpu_usage)}' \
                               f'\n Mem Usage: {self.round_stat(memory_usage)} %' \
                               f'\n Temp: {self.round_stat(temp)} °C' \
-                              f'\n Disk Usage: {self.round_stat(disk_usage)} % \n' \
+                              f'\n Disk Usage: {self.round_stat(disk_usage)} %' \
+                              f'\n IP address: {self._host_ip_address}' \
+                              f'\n MAC address: {self._mac_address} \n' \
                               f'\n Screen Summary:\n {screen_summary}\n'
         return server_stats_report
 
