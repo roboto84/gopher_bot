@@ -28,8 +28,11 @@ class GopherBot:
     def _receive_message_callback(self, package: dict) -> bool:
         if ('id' in package) and (package['id'] not in ['wh00t_server', 'gopher_bot']) and ('message' in package):
             if 'category' in package and package['category'] == 'chat_message' and \
-                    isinstance(package['message'], str) and package['message'].replace(self._chat_key, '') == '':
-                self._send_server_data()
+                    isinstance(package['message'], str):
+                if package['message'].rstrip().replace(self._chat_key, '') == '':
+                    self._send_chat_data(f'{self._host_name} is UP 🤖')
+                elif package['message'].replace(self._chat_key, '').strip() == self._host_name:
+                    self._send_server_data()
         return True
 
     @staticmethod
@@ -46,6 +49,7 @@ class GopherBot:
         return round(data, 2)
 
     def _get_server_data(self) -> str:
+        # TODO: Consider using "hostnamectl" data and differentitate between computer platforms
         cpu_utilization: float = psutil.cpu_percent(4)
         load1, load5, load15 = psutil.getloadavg()
         cpu_usage: float = load1 * 100
