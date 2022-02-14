@@ -38,7 +38,7 @@ class GopherBot:
     @staticmethod
     def _get_mac_address():
         mac_address: int = uuid.getnode()
-        if (mac_address >> 40)%2 :
+        if (mac_address >> 40) % 2:
             mac_address_string = 'MAC address not found'
         else:
             mac_address_string = ':'.join(re.findall('..', '%012x' % mac_address))
