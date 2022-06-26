@@ -5,10 +5,10 @@ description = 'Simple server stats tracking bot with support for wh00t server ch
 authors = ['roboto84 <7658704+roboto84@users.noreply.github.com>']
 
 [tool.poetry.dependencies]
-python = '^3.8'
+python = '^3.10'
 python-dotenv = '^0.15.0'
 psutil = '^5.8.0'
-wh00t-core = {git = 'https://github.com/roboto84/wh00t_core.git', tag = 'v0.4.2'}
+wh00t-core = {git = 'https://github.com/roboto84/wh00t_core.git', tag = 'v0.4.4'}
 
 [tool.poetry.dev-dependencies]
 pytest = '^5.2'
