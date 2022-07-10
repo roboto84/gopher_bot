@@ -8,6 +8,7 @@ import logging.config
 from typing import Any
 from dotenv import load_dotenv
 from wh00t_core.library.client_network import ClientNetwork
+from bin.utils import get_external_ip
 
 
 class GopherBot:
@@ -59,6 +60,7 @@ class GopherBot:
         logger.info(temp_sensor_data)
         temp = f'{self.round_stat(temp_sensor_data["acpitz"][0].current)} °C' \
             if 'acpitz' in temp_sensor_data else 'unknown'
+        external_ip_address: str = get_external_ip()
         screen_summary = (''.join(os.popen('screen -ls').readlines())).rstrip('\n')
         server_stats_report = f' 🖥️ | {self._host_name}' \
                               f'\n\n CPU Utilization: {self.round_stat(cpu_utilization)} %' \
@@ -66,7 +68,8 @@ class GopherBot:
                               f'\n Mem Usage: {self.round_stat(memory_usage)} %' \
                               f'\n Temp: {temp}' \
                               f'\n Disk Usage: {self.round_stat(disk_usage)} %' \
-                              f'\n IP address: {self._host_ip_address}' \
+                              f'\n Internal IP address: {self._host_ip_address}' \
+                              f'\n External IP address: {external_ip_address}' \
                               f'\n MAC address: {self._mac_address} \n' \
                               f'\n Screen Summary:\n {screen_summary}\n'
         return server_stats_report
