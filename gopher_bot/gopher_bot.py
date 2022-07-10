@@ -54,14 +54,17 @@ class GopherBot:
         load1, load5, load15 = psutil.getloadavg()
         cpu_usage: float = load1 * 100
         memory_usage: float = psutil.virtual_memory()[2]
-        disk_usage = psutil.disk_usage('/').percent
-        temp = psutil.sensors_temperatures()['acpitz'][0].current
+        disk_usage: float = psutil.disk_usage('/').percent
+        temp_sensor_data = psutil.sensors_temperatures()
+        logger.info(temp_sensor_data)
+        temp = f'{self.round_stat(temp_sensor_data["acpitz"][0].current)} °C' \
+            if 'acpitz' in temp_sensor_data else 'unknown'
         screen_summary = (''.join(os.popen('screen -ls').readlines())).rstrip('\n')
-        server_stats_report = f'\n\n 🖥️ | {self._host_name}' \
-                              f'\n CPU Utilization: {self.round_stat(cpu_utilization)} %' \
+        server_stats_report = f' 🖥️ | {self._host_name}' \
+                              f'\n\n CPU Utilization: {self.round_stat(cpu_utilization)} %' \
                               f'\n CPU Load: {self.round_stat(cpu_usage)}' \
                               f'\n Mem Usage: {self.round_stat(memory_usage)} %' \
-                              f'\n Temp: {self.round_stat(temp)} °C' \
+                              f'\n Temp: {temp}' \
                               f'\n Disk Usage: {self.round_stat(disk_usage)} %' \
                               f'\n IP address: {self._host_ip_address}' \
                               f'\n MAC address: {self._mac_address} \n' \
