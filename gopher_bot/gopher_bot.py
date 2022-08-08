@@ -8,6 +8,7 @@ import logging.config
 from typing import Any
 from dotenv import load_dotenv
 from wh00t_core.library.client_network import ClientNetwork
+from wh00t_core.library.network_commons import NetworkCommons
 from bin.utils import get_external_ip
 
 
@@ -19,6 +20,7 @@ class GopherBot:
         self._host_name: str = socket.gethostname()
         self._host_ip_address: str = socket.gethostbyname(self._host_name)
         self._mac_address: str = GopherBot._get_mac_address()
+        self._network_commons: NetworkCommons = NetworkCommons()
         self._socket_network: ClientNetwork = ClientNetwork(socket_host, socket_port,
                                                             'gopher_bot', 'app', logging)
 
@@ -28,7 +30,7 @@ class GopherBot:
 
     def _receive_message_callback(self, package: dict) -> bool:
         if ('id' in package) and (package['id'] not in ['wh00t_server', 'gopher_bot']) and ('message' in package):
-            if 'category' in package and package['category'] == 'chat_message' and \
+            if 'category' in package and package['category'] == self._network_commons.get_chat_message_category() and \
                     isinstance(package['message'], str):
                 if package['message'].rstrip().replace(self._chat_key, '') == '':
                     self._send_chat_data(f'{self._host_name} is UP 🤖')
@@ -79,7 +81,7 @@ class GopherBot:
         self._send_chat_data(self._get_server_data())
 
     def _send_chat_data(self, chat_message: str):
-        self._socket_network.send_message('chat_message', chat_message)
+        self._socket_network.send_message(self._network_commons.get_chat_message_category(), chat_message)
 
 
 if __name__ == '__main__':
