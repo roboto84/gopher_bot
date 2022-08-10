@@ -7,13 +7,13 @@ import re
 import psutil
 import socket
 import logging.config
-from datetime import datetime
+from datetime import datetime, tzinfo
 from typing import Any
 from dotenv import load_dotenv
 from wh00t_core.library.client_network import ClientNetwork
 from wh00t_core.library.network_commons import NetworkCommons
 from wh00t_core.library.network_utils import NetworkUtils
-from bin.utils import get_external_ip
+from bin.utils import get_external_ip, get_external_ip_location
 
 
 class GopherBot:
@@ -63,25 +63,29 @@ class GopherBot:
         load1, load5, load15 = psutil.getloadavg()
         cpu_usage: float = load1 * 100
         memory_usage: float = psutil.virtual_memory()[2]
+        total_memory: float = psutil.virtual_memory().total / float(1 << 30)
+        disk_space: float = psutil.disk_usage('/').total / float(1 << 30)
         disk_usage: float = psutil.disk_usage('/').percent
         temp_sensor_data: dict = psutil.sensors_temperatures()
         logger.info(temp_sensor_data)
         temp = f'{self.round_stat(temp_sensor_data["acpitz"][0].current)} °C' \
             if 'acpitz' in temp_sensor_data else 'unknown'
         external_ip_address: str = get_external_ip()
+        external_ip_location: str = get_external_ip_location(external_ip_address)
         local_time: str = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-        local_timezone = datetime.utcnow().astimezone().tzinfo
+        local_timezone: tzinfo = datetime.utcnow().astimezone().tzinfo
         screen_summary = (''.join(os.popen('screen -ls').readlines())).rstrip('\n')
         server_stats_report = f' 🖥️ | {self._host_name}' \
                               f'\n\n Platform: {platform_summary}' \
                               f'\n DateTime: {local_time} {local_timezone}' \
                               f'\n CPU Utilization: {self.round_stat(cpu_utilization)} %' \
                               f'\n CPU Load: {self.round_stat(cpu_usage)}' \
-                              f'\n Mem Usage: {self.round_stat(memory_usage)} %' \
                               f'\n Temp: {temp}' \
-                              f'\n Disk Usage: {self.round_stat(disk_usage)} %' \
+                              f'\n Mem Usage: {self.round_stat(memory_usage)} % of {self.round_stat(total_memory)} GB' \
+                              f'\n Disk Usage: {self.round_stat(disk_usage)} % of {self.round_stat(disk_space)} GB' \
                               f'\n Internal IP address: {self._host_ip_address}' \
                               f'\n External IP address: {external_ip_address}' \
+                              f'\n External IP location: {external_ip_location}' \
                               f'\n MAC address: {self._mac_address} \n' \
                               f'\n Screen Summary:\n {screen_summary}\n'
         return server_stats_report
