@@ -1,14 +1,18 @@
 # Gopher server stats bot
 import os
+import time
+import platform
 import uuid
 import re
 import psutil
 import socket
 import logging.config
+from datetime import datetime
 from typing import Any
 from dotenv import load_dotenv
 from wh00t_core.library.client_network import ClientNetwork
 from wh00t_core.library.network_commons import NetworkCommons
+from wh00t_core.library.network_utils import NetworkUtils
 from bin.utils import get_external_ip
 
 
@@ -21,6 +25,7 @@ class GopherBot:
         self._host_ip_address: str = socket.gethostbyname(self._host_name)
         self._mac_address: str = GopherBot._get_mac_address()
         self._network_commons: NetworkCommons = NetworkCommons()
+        self._network_utils: NetworkUtils = NetworkUtils()
         self._socket_network: ClientNetwork = ClientNetwork(socket_host, socket_port,
                                                             'gopher_bot', 'app', logging)
 
@@ -53,19 +58,24 @@ class GopherBot:
 
     def _get_server_data(self) -> str:
         # TODO: Consider using "hostnamectl" data and differentitate between computer platforms
+        platform_summary: str = platform.platform()
         cpu_utilization: float = psutil.cpu_percent(4)
         load1, load5, load15 = psutil.getloadavg()
         cpu_usage: float = load1 * 100
         memory_usage: float = psutil.virtual_memory()[2]
         disk_usage: float = psutil.disk_usage('/').percent
-        temp_sensor_data = psutil.sensors_temperatures()
+        temp_sensor_data: dict = psutil.sensors_temperatures()
         logger.info(temp_sensor_data)
         temp = f'{self.round_stat(temp_sensor_data["acpitz"][0].current)} °C' \
             if 'acpitz' in temp_sensor_data else 'unknown'
         external_ip_address: str = get_external_ip()
+        local_time: str = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+        local_timezone = datetime.utcnow().astimezone().tzinfo
         screen_summary = (''.join(os.popen('screen -ls').readlines())).rstrip('\n')
         server_stats_report = f' 🖥️ | {self._host_name}' \
-                              f'\n\n CPU Utilization: {self.round_stat(cpu_utilization)} %' \
+                              f'\n\n Platform: {platform_summary}' \
+                              f'\n DateTime: {local_time} {local_timezone}' \
+                              f'\n CPU Utilization: {self.round_stat(cpu_utilization)} %' \
                               f'\n CPU Load: {self.round_stat(cpu_usage)}' \
                               f'\n Mem Usage: {self.round_stat(memory_usage)} %' \
                               f'\n Temp: {temp}' \
