@@ -9,7 +9,7 @@ python = '^3.10'
 python-dotenv = '^0.15.0'
 psutil = '^5.8.0'
 requests = '^2.27.1'
-wh00t-core = {git = 'https://github.com/roboto84/wh00t_core.git', tag = 'v0.5.0'}
+wh00t-core = {git = 'https://github.com/roboto84/wh00t_core.git', tag = 'v0.5.1'}
 
 [tool.poetry.dev-dependencies]
 pytest = '^6.2.5'
